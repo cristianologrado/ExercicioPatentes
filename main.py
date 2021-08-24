@@ -50,6 +50,7 @@ if __name__ == '__main__':
     contagempatentes.to_csv('contagem_patentes.csv', sep=';')
 
 # grafico com total de patentes por ano
-    contagempatentes.plot(kind='bar', figsize=(15, 6), xlabel='ano', ylabel='bytes', y='bytes',
+# excluindo o nao de 2015, que não dispoe de dados completos
+    contagempatentes[0:-1].plot(kind='bar', figsize=(15, 6), xlabel='ano', ylabel='bytes', y='bytes',
                           title=' Total de Bytes, por ano')
     plt.show()
