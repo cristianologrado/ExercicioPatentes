@@ -39,7 +39,7 @@ if __name__ == '__main__':
     # criar pasta para salvar arquivos de dados das patentes
     if not os.path.exists(diretorio_arquivos):
         os.mkdir(diretorio_arquivos)
-    Patentes.baixararquivos(diretorio_arquivos, links2[0:30], contagempatentes['quantidade'].sum())
+    Patentes.baixararquivos(diretorio_arquivos, links2[0:5], contagempatentes['quantidade'].sum())
     detalhes_por_ano = Patentes.capturardetalhes(links2, 'detalhes_por_ano.csv')
 
 #   totalizando o total de dados em cada ano
