@@ -1,4 +1,3 @@
-
 # MBA Big Data, Business Analytics e gestão de negocios
 # IDP
 
@@ -16,34 +15,41 @@ import os
 import urllib.request
 from bs4 import BeautifulSoup
 import Patentes
+import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     url_base = 'http://storage.googleapis.com/'
     url_in = 'https://www.google.com/googlebooks/uspto-patents-grants-text.html'
     diretorio_arquivos = 'data'
 
-# leitura do htmls da paginas
+    # leitura do htmls da paginas
     response = urllib.request.urlopen(url_in)
     html_in = BeautifulSoup(response)
 
     anos = Patentes.capturar_anos(html_in.find_all('h3'))
 
-# importando os links
+    # importando os links
     links1 = html_in.find_all('a', href=True)
-
-#filtrando links para os arquivos zip
-    links2 = [l.get('href') for l in links1 if 'http://storage.googleapis.com/patents/grant_full_text' in l.get('href')]
+    # filtrando links para os arquivos zip
+    links2 = [link.get('href') for link in links1 if
+              'http://storage.googleapis.com/patents/grant_full_text' in link.get('href')]
     contagempatentes = Patentes.contar_patentes(anos, links2)
+    # salvando o total de patentes de cada ano
+    contagempatentes.to_csv('contagem_patentes.csv', sep=';')
+    # criar pasta para salvar arquivos de dados das patentes
+    if not os.path.exists(diretorio_arquivos):
+        os.mkdir(diretorio_arquivos)
+    Patentes.baixararquivos(diretorio_arquivos, links2[0:30], contagempatentes['quantidade'].sum())
+    detalhes_por_ano = Patentes.capturardetalhes(links2, 'detalhes_por_ano.csv')
 
-# salvando o total de patentes de cada ano
+#   totalizando o total de dados em cada ano
+    total_ano = detalhes_por_ano[['ano', 'tamanho']].groupby('ano').sum()
+
+#   guardando a informacao no arquivo de contagem de patentes
+    contagempatentes['bytes'] = total_ano['tamanho']
     contagempatentes.to_csv('contagem_patentes.csv', sep=';')
 
 # grafico com total de patentes por ano
-    contagempatentes.plot(kind='bar',figsize=(15,6),xlabel='ano',ylabel='quantidade patantes no ano')
-
-#criar pasta para salvar arquivos de dados das patentes
-    if not os.path.exists(diretorio_arquivos):
-        os.mkdir(diretorio_arquivos)
-
-    Patentes.baixararquivos(diretorio_arquivos, links2[0:30], contagempatentes['quantidade'].sum())
-    detalhes_por_ano = Patentes.capturardetalhes(links2, 'detalhes_por_ano.csv')
+    contagempatentes.plot(kind='bar', figsize=(15, 6), xlabel='ano', ylabel='bytes', y='bytes',
+                          title=' Total de Bytes, por ano')
+    plt.show()
